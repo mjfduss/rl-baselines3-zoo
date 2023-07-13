@@ -13,7 +13,7 @@ import yaml
 from gymnasium import spaces
 from huggingface_hub import HfApi
 from huggingface_sb3 import EnvironmentName, ModelName
-from sb3_contrib import ARS, QRDQN, TQC, TRPO, RecurrentPPO
+from sb3_contrib import ARS, QRDQN, TQC, TRPO
 from stable_baselines3 import A2C, DDPG, DQN, PPO, SAC, TD3
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.callbacks import BaseCallback
@@ -23,6 +23,9 @@ from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv,
 
 # For custom activation fn
 from torch import nn as nn
+
+# Custom Algorithm
+from rl_zoo3.custom_ppo_recurrent import RecurrentPPO
 
 ALGOS: Dict[str, Type[BaseAlgorithm]] = {
     "a2c": A2C,
@@ -99,8 +102,10 @@ def get_wrapper_class(hyperparams: Dict[str, Any], key: str = "env_wrapper") -> 
                 kwargs = wrapper_dict[wrapper_name]
             else:
                 kwargs = {}
-            wrapper_module = importlib.import_module(get_module_name(wrapper_name))
-            wrapper_class = getattr(wrapper_module, get_class_name(wrapper_name))
+            wrapper_module = importlib.import_module(
+                get_module_name(wrapper_name))
+            wrapper_class = getattr(
+                wrapper_module, get_class_name(wrapper_name))
             wrapper_classes.append(wrapper_class)
             wrapper_kwargs.append(kwargs)
 
@@ -326,7 +331,8 @@ def get_trained_models(log_folder: str) -> Dict[str, Tuple[str, str]]:
         if not os.path.isdir(os.path.join(log_folder, algo)):
             continue
         for model_folder in os.listdir(os.path.join(log_folder, algo)):
-            args_files = glob.glob(os.path.join(log_folder, algo, model_folder, "*/args.yml"))
+            args_files = glob.glob(os.path.join(
+                log_folder, algo, model_folder, "*/args.yml"))
             if len(args_files) != 1:
                 continue  # we expect only one sub-folder with an args.yml file
             with open(args_files[0]) as fh:
@@ -417,7 +423,8 @@ def get_saved_hyperparams(
         if os.path.isfile(config_file):
             # Load saved hyperparameters
             with open(os.path.join(stats_path, "config.yml")) as f:
-                hyperparams = yaml.load(f, Loader=yaml.UnsafeLoader)  # pytype: disable=module-attr
+                # pytype: disable=module-attr
+                hyperparams = yaml.load(f, Loader=yaml.UnsafeLoader)
             hyperparams["normalize"] = hyperparams.get("normalize", False)
         else:
             obs_rms_path = os.path.join(stats_path, "obs_rms.pkl")
@@ -430,7 +437,8 @@ def get_saved_hyperparams(
                 if test_mode:
                     normalize_kwargs["norm_reward"] = norm_reward
             else:
-                normalize_kwargs = {"norm_obs": hyperparams["normalize"], "norm_reward": norm_reward}
+                normalize_kwargs = {
+                    "norm_obs": hyperparams["normalize"], "norm_reward": norm_reward}
             hyperparams["normalize_kwargs"] = normalize_kwargs
     return hyperparams, stats_path
 
@@ -483,12 +491,14 @@ def get_model_path(
         model_path = os.path.join(log_path, "best_model.zip")
         name_prefix = f"best-model-{model_name}"
     elif load_checkpoint is not None:
-        model_path = os.path.join(log_path, f"rl_model_{load_checkpoint}_steps.zip")
+        model_path = os.path.join(
+            log_path, f"rl_model_{load_checkpoint}_steps.zip")
         name_prefix = f"checkpoint-{load_checkpoint}-{model_name}"
     elif load_last_checkpoint:
         checkpoints = glob.glob(os.path.join(log_path, "rl_model_*_steps.zip"))
         if len(checkpoints) == 0:
-            raise ValueError(f"No checkpoint found for {algo} on {env_name}, path: {log_path}")
+            raise ValueError(
+                f"No checkpoint found for {algo} on {env_name}, path: {log_path}")
 
         def step_count(checkpoint_path: str) -> int:
             # path follow the pattern "rl_model_*_steps.zip", we count from the back to ignore any other _ in the path
@@ -504,6 +514,7 @@ def get_model_path(
 
     found = os.path.isfile(model_path)
     if not found:
-        raise ValueError(f"No model found for {algo} on {env_name}, path: {model_path}")
+        raise ValueError(
+            f"No model found for {algo} on {env_name}, path: {model_path}")
 
     return name_prefix, model_path, log_path
