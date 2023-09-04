@@ -194,8 +194,8 @@ class Cfc(nn.Module):
             )
         for t in range(seq_len):
             inputs = x[:, t]
-            print("custom_cfc.py line 197:", timespans)
-            ts = timespans[:, t].squeeze()
+            timespans = torch.cat(timespans)
+            ts = timespans[:,t].squeeze()
             if mask is not None:
                 if mask.size(-1) == true_in_features:
                     forwarded_input = (
