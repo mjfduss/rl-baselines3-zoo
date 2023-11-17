@@ -5,6 +5,9 @@ from gymnasium.envs.registration import register
 
 from rl_zoo3.wrappers import MaskVelocityWrapper
 
+# Bridge Env
+from py_bridge_designer import bridge_env
+
 try:
     import pybullet_envs  # pytype: disable=import-error
 except ImportError:
@@ -72,3 +75,6 @@ for env_id in MaskVelocityWrapper.velocity_indices.keys():
         id=f"{name}NoVel-v{version}",
         entry_point=create_no_vel_env(env_id),
     )
+
+# Bridge Env
+register(id="BridgeEnv", entry_point=bridge_env.BridgeEnv)
