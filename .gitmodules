@@ -4,3 +4,4 @@
 [submodule "py_bridge_designer"]
 	path = py_bridge_designer
 	url = https://github.com/mjfduss/py_bridge_designer
+	branch = main
