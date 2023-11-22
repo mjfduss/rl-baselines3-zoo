@@ -77,4 +77,4 @@ for env_id in MaskVelocityWrapper.velocity_indices.keys():
     )
 
 # Bridge Env
-register(id="BridgeEnv", entry_point=bridge_env.BridgeEnv)
+register(id="BridgeEnv", entry_point=bridge_env.BridgeEnv, max_episode_steps=8192)
