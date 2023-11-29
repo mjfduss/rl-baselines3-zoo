@@ -1,0 +1,21 @@
+BridgeEnv:
+  normalize: True
+  n_envs: 8
+  n_timesteps: !!float 2e6
+  policy: 'MlpLstmPolicy'
+  n_steps: 32
+  batch_size: 256
+  gae_lambda: 0.8
+  gamma: 0.98
+  n_epochs: 20
+  ent_coef: 0.0
+  learning_rate: lin_0.001
+  clip_range: lin_0.2
+  monitor_kwargs: "dict(info_keywords=('bridge_valid','current_error',))"
+  policy_kwargs: "dict(
+                    ortho_init=False,
+                    activation_fn=nn.ReLU,
+                    lstm_hidden_size=64,
+                    enable_critic_lstm=True,
+                    net_arch=dict(pi=[64], vf=[64])
+                  )"
