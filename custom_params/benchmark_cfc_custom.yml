@@ -11,25 +11,6 @@ CartPole-v1:
   ent_coef: 0.0
   learning_rate: lin_0.001
   clip_range: lin_0.2
-  policy_kwargs: "dict(
-                    lstm_kwargs=dict(
-                      out_feature=2,
-                      hparams=dict(
-                        backbone_activation=\"lecun\",
-                        backbone_units=64,
-                        backbone_dr=0.3,
-                        backbone_layers=2,
-                        weight_decay=4e-06,
-                        optim=\"adamw\",
-                        init=0.6,
-                        batch_size=128,
-                        use_mixed=True,
-                        no_gate=False,
-                        minimal=False,
-                        use_ltc=False,
-                      )
-                    )
-                  )"
 
 
 Acrobot-v1:
@@ -42,13 +23,6 @@ Acrobot-v1:
   gamma: 0.99
   n_epochs: 4
   ent_coef: 0.0
-  policy_kwargs: "dict(
-                    ortho_init=False,
-                    activation_fn=nn.ReLU,
-                    lstm_hidden_size=64,
-                    enable_critic_lstm=True,
-                    net_arch=dict(pi=[64], vf=[64])
-                  )"
 
 
 BipedalWalker-v3:
@@ -64,13 +38,6 @@ BipedalWalker-v3:
   ent_coef: 0.0
   learning_rate: !!float 3e-4
   clip_range: 0.18
-  policy_kwargs: "dict(
-                    ortho_init=False,
-                    activation_fn=nn.ReLU,
-                    lstm_hidden_size=64,
-                    enable_critic_lstm=True,
-                    net_arch=dict(pi=[64], vf=[64])
-                  )"
 
 
 LunarLander-v2: &lunar-defaults
@@ -84,10 +51,3 @@ LunarLander-v2: &lunar-defaults
   gamma: 0.999
   n_epochs: 4
   ent_coef: 0.01
-  policy_kwargs: "dict(
-                    ortho_init=False,
-                    activation_fn=nn.ReLU,
-                    lstm_hidden_size=64,
-                    enable_critic_lstm=True,
-                    net_arch=dict(pi=[64], vf=[64])
-                  )"

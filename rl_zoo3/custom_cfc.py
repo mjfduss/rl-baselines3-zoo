@@ -107,7 +107,6 @@ class CfcCell(nn.Module):
             self.time_a = nn.Linear(self.hparams["backbone_units"], hidden_size)
             self.time_b = nn.Linear(self.hparams["backbone_units"], hidden_size)
         self.init_weights()
-        
 
     def init_weights(self):
         init_gain = self.hparams.get("init")
@@ -172,8 +171,6 @@ class Cfc(nn.Module):
         if self.use_mixed:
             self.lstm = LSTMCell(in_features, hidden_size)
         self.fc = nn.Linear(self.hidden_size, self.out_feature)
-        self.num_layers = hparams["backbone_layers"] + 7
-        self.input_size = in_features
 
     def forward(self, x, timespans=None, mask=None):
         device = x.device
@@ -194,8 +191,7 @@ class Cfc(nn.Module):
             )
         for t in range(seq_len):
             inputs = x[:, t]
-            timespans = torch.cat(timespans)
-            ts = timespans[:,t].squeeze()
+            ts = timespans[:, t].squeeze()
             if mask is not None:
                 if mask.size(-1) == true_in_features:
                     forwarded_input = (
