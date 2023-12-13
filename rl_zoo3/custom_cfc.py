@@ -118,7 +118,7 @@ class CfcCell(nn.Module):
     def forward(self, input, hx, ts):
 
         batch_size = input.size(0)
-        ts = ts.reshape(batch_size, 1)
+        ts = ts.view(batch_size, 1)
         x = torch.cat([input, hx], 1)
 
         x = self.backbone(x)
@@ -174,8 +174,8 @@ class Cfc(nn.Module):
 
     def forward(self, x, timespans=None, mask=None):
         device = x.device
-        batch_size = x.size(1)
-        seq_len = x.size(0)
+        batch_size = x.size(0)
+        seq_len = x.size(1)
         true_in_features = x.size(2)
         h_state = torch.zeros((batch_size, self.hidden_size), device=device)
         if self.use_mixed:
@@ -190,9 +190,8 @@ class Cfc(nn.Module):
                 (batch_size, true_in_features), device=device
             )
         for t in range(seq_len):
-            inputs = x[t]
-            timespans = torch.cat(timespans)
-            ts = timespans[:,t].squeeze()
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()
             if mask is not None:
                 if mask.size(-1) == true_in_features:
                     forwarded_input = (
@@ -226,17 +225,14 @@ class Cfc(nn.Module):
                 )
             if self.return_sequences:
                 output_sequence.append(self.fc(h_state))
-        """
+
         if self.return_sequences:
             readout = torch.stack(output_sequence, dim=1)
         elif mask is not None:
             readout = forwarded_output
         else:
             readout = self.fc(h_state)
-        """
-        output = self.fc(h_state)
-        states = torch.stack(output_sequence, dim=1)
-        return output, states
+        return readout
 
 
 class LTCCell(nn.Module):
