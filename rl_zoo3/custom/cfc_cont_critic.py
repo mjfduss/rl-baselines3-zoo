@@ -5,9 +5,8 @@ from torch import nn
 
 from stable_baselines3.common.policies import BaseModel
 from stable_baselines3.common.preprocessing import get_action_dim
-from stable_baselines3.common.torch_layers import BaseFeaturesExtractor, create_mlp
+from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
-# CUSTOM Change 1 of
 from rl_zoo3.custom.cfc import Cfc
 
 
@@ -61,7 +60,6 @@ class CfcCritic(BaseModel):
 
         action_dim = get_action_dim(self.action_space)
 
-        # CUSTOM Change 2 of
         cfc_hparams = {
             "clipnorm": 1,
             "optimizer": "adam",
@@ -82,29 +80,31 @@ class CfcCritic(BaseModel):
         self.n_critics = n_critics
         self.q_networks: List[nn.Module] = []
         for idx in range(n_critics):
-            # q_net_list = create_mlp(features_dim + action_dim, 1, net_arch, activation_fn)
-            # q_net = nn.Sequential(*q_net_list)
-
-            # CUSTOM Change 3 of
             q_net = Cfc(
                 in_features=features_dim + action_dim,
                 hidden_size=cfc_hparams["size"],
                 out_feature=1,
-                hparams=cfc_hparams
+                hparams=cfc_hparams,
+                return_sequences=True
             )
-
             self.add_module(f"qf{idx}", q_net)
             self.q_networks.append(q_net)
+
+    def _make_time(self, features: th.Tensor) -> th.Tensor:
+        time = th.stack([th.full(size=(1,), fill_value=i + 1) for i in range(features.size(dim=0))])
+        time.to(self.device)
+        return time
 
     def forward(self, obs: th.Tensor, actions: th.Tensor) -> Tuple[th.Tensor, ...]:
         # Learn the features extractor using the policy loss only
         # when the features_extractor is shared with the actor
         with th.set_grad_enabled(not self.share_features_extractor):
             features = self.extract_features(obs, self.features_extractor)
-        print("CfcCritic: features.shape:", features.shape)
-        print("CfcCritic: actions.shape:", actions.shape)
-        qvalue_input = th.cat([features, actions], dim=1)
-        return tuple(q_net(qvalue_input) for q_net in self.q_networks)
+        time = self._make_time(features)
+        # Add a single 1 batch dimension to the inputs
+        qvalue_input = th.unsqueeze(th.cat([features, actions], dim=1), 0)
+        time = th.unsqueeze(time, 0)
+        return tuple(q_net(qvalue_input, timespans=time) for q_net in self.q_networks)
 
     def q1_forward(self, obs: th.Tensor, actions: th.Tensor) -> th.Tensor:
         """
@@ -114,4 +114,8 @@ class CfcCritic(BaseModel):
         """
         with th.no_grad():
             features = self.extract_features(obs, self.features_extractor)
-        return self.q_networks[0](th.cat([features, actions], dim=1))
+        time = self._make_time(features)
+        # Add a single 1 batch dimension to the inputs
+        qvalue_input = th.unsqueeze(th.cat([features, actions], dim=1), 0)
+        time = th.unsqueeze(time, 0)
+        return self.q_networks[0](qvalue_input, timespans=time)
