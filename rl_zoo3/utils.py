@@ -13,20 +13,19 @@ import yaml
 from gymnasium import spaces
 from huggingface_hub import HfApi
 from huggingface_sb3 import EnvironmentName, ModelName
-from sb3_contrib import ARS, QRDQN, TQC, TRPO
-from stable_baselines3 import A2C, DDPG, DQN, SAC, TD3
+from sb3_contrib import ARS, QRDQN, TQC, TRPO, RecurrentPPO
+from stable_baselines3 import A2C, DDPG, DQN, PPO, SAC, TD3
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.sb2_compat.rmsprop_tf_like import RMSpropTFLike  # noqa: F401
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv, VecFrameStack, VecNormalize
 
+# CUSTOM Change 1 of 2
+from rl_zoo3.custom.cfc_td3 import CfcTD3
+
 # For custom activation fn
 from torch import nn as nn
-
-# Custom Algorithm
-from rl_zoo3.custom_ppo_recurrent import RecurrentPPO
-from rl_zoo3.custom_ppo import PPO
 
 ALGOS: Dict[str, Type[BaseAlgorithm]] = {
     "a2c": A2C,
@@ -41,6 +40,8 @@ ALGOS: Dict[str, Type[BaseAlgorithm]] = {
     "tqc": TQC,
     "trpo": TRPO,
     "ppo_lstm": RecurrentPPO,
+    # CUSTOM Change 2 of 2
+    "cfc_td3": CfcTD3,
 }
 
 
